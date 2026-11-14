@@ -1,18 +1,21 @@
 
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Play } from 'lucide-react';
 import { extractVideoId } from '@/utils/youtubeUtils';
 import { toast } from 'sonner';
+import { useLanguage } from '@/context/LanguageContext';
 
 import FileUpload from '@/components/FileUpload';
 import PlaylistManager from '@/components/PlaylistManager';
 import Cylinder from '@/components/Cylinder';
 import YoutubePlayer from '@/components/YoutubePlayer';
+import LanguageSwitcher from '@/components/LanguageSwitcher';
 
 const MINIMUM_SONG_COUNT = 2;
 
 const Index = () => {
+  const { t } = useLanguage();
   const [urls, setUrls] = useState<string[]>([]);
   const [selectedIndex, setSelectedIndex] = useState<number | null>(null);
   const [isSpinning, setIsSpinning] = useState(false);
@@ -20,17 +23,17 @@ const Index = () => {
 
   const handleUrlsUploaded = (newUrls: string[]) => {
     setUrls(newUrls);
-    
+
     if (newUrls.length < MINIMUM_SONG_COUNT) {
-      toast.warning(`Added ${newUrls.length} videos. You need at least ${MINIMUM_SONG_COUNT} for the game.`);
+      toast.warning(t('uploadTooFew', { count: newUrls.length, min: MINIMUM_SONG_COUNT }));
     } else {
-      toast.success(`Playlist loaded with ${newUrls.length} videos!`);
+      toast.success(t('uploadSuccess', { count: newUrls.length }));
     }
   };
 
   const spinRoulette = () => {
     if (urls.length < MINIMUM_SONG_COUNT) {
-      toast.error(`You need at least ${MINIMUM_SONG_COUNT} videos to play!`);
+      toast.error(t('needMoreVideos', { min: MINIMUM_SONG_COUNT }));
       return;
     }
 
@@ -45,7 +48,7 @@ const Index = () => {
 
       setSelectedIndex(randomIndex);
       setIsSpinning(false);
-      
+
       if (videoId) {
         setTimeout(() => {
           setSelectedVideoId(videoId);
@@ -57,11 +60,14 @@ const Index = () => {
   return (
     <div className="min-h-screen bg-gradient-to-b from-black to-roulette-dark text-white p-6">
       <header className="max-w-4xl mx-auto text-center mb-8">
+        <div className="flex justify-end mb-2">
+          <LanguageSwitcher />
+        </div>
         <h1 className="text-4xl font-bold mb-2 bg-gradient-to-r from-neon-red to-neon-purple bg-clip-text text-transparent">
-          YouTube Playlist Roulette
+          {t('title')}
         </h1>
         <p className="text-gray-400">
-          Add YouTube videos (at least {MINIMUM_SONG_COUNT}) and test your luck!
+          {t('subtitle', { min: MINIMUM_SONG_COUNT })}
         </p>
       </header>
 
@@ -69,14 +75,14 @@ const Index = () => {
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
           <div className="flex flex-col">
             <FileUpload onUrlsUploaded={handleUrlsUploaded} />
-            
-            <PlaylistManager 
-              urls={urls} 
-              onUrlsChange={setUrls} 
+
+            <PlaylistManager
+              urls={urls}
+              onUrlsChange={setUrls}
             />
-            
+
             <div className="mt-6 flex justify-center">
-              <Button 
+              <Button
                 onClick={spinRoulette}
                 disabled={urls.length < MINIMUM_SONG_COUNT || isSpinning}
                 className={`
@@ -87,18 +93,18 @@ const Index = () => {
                 `}
               >
                 <Play size={24} />
-                {isSpinning ? "Spinning..." : "Spin & Play"}
+                {isSpinning ? t('spinning') : t('spin')}
               </Button>
             </div>
           </div>
-          
+
           <div className="flex flex-col">
-            <Cylinder 
-              isSpinning={isSpinning} 
-              selectedIndex={selectedIndex} 
+            <Cylinder
+              isSpinning={isSpinning}
+              selectedIndex={selectedIndex}
               songCount={urls.length || MINIMUM_SONG_COUNT}
             />
-            
+
             <div className="mt-4">
               <YoutubePlayer videoId={selectedVideoId} />
             </div>
