@@ -4,6 +4,7 @@ import { Input } from '@/components/ui/input';
 import { Trash2, Download } from 'lucide-react';
 import { extractVideoId, isValidYoutubeUrl } from '@/utils/youtubeUtils';
 import { toast } from 'sonner';
+import { useLanguage } from '@/context/LanguageContext';
 
 interface PlaylistManagerProps {
   urls: string[];
@@ -11,29 +12,30 @@ interface PlaylistManagerProps {
 }
 
 const PlaylistManager: React.FC<PlaylistManagerProps> = ({ urls, onUrlsChange }) => {
+  const { t } = useLanguage();
   const [newUrl, setNewUrl] = useState('');
 
   const handleUrlAdd = () => {
     if (!isValidYoutubeUrl(newUrl)) {
-      toast.error("Please enter a valid YouTube URL");
+      toast.error(t('enterValidUrl'));
       return;
     }
 
     if (urls.includes(newUrl)) {
-      toast.error("This URL is already in your playlist");
+      toast.error(t('duplicateUrl'));
       return;
     }
 
     onUrlsChange([...urls, newUrl]);
     setNewUrl('');
-    toast.success("Song added to playlist");
+    toast.success(t('songAdded'));
   };
 
   const handleUrlRemove = (index: number) => {
     const newUrls = [...urls];
     newUrls.splice(index, 1);
     onUrlsChange(newUrls);
-    toast.success("Song removed from playlist");
+    toast.success(t('songRemoved'));
   };
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
@@ -53,13 +55,13 @@ const PlaylistManager: React.FC<PlaylistManagerProps> = ({ urls, onUrlsChange })
     a.click();
     document.body.removeChild(a);
     window.URL.revokeObjectURL(url);
-    toast.success("Playlist downloaded successfully");
+    toast.success(t('downloadSuccess'));
   };
 
   return (
     <div className="w-full">
       <div className="flex justify-between items-center mb-4">
-        <h2 className="text-xl font-bold">Playlist</h2>
+        <h2 className="text-xl font-bold">{t('playlistTitle')}</h2>
         {urls.length > 0 && (
           <Button
             variant="outline"
@@ -77,21 +79,21 @@ const PlaylistManager: React.FC<PlaylistManagerProps> = ({ urls, onUrlsChange })
           value={newUrl}
           onChange={(e) => setNewUrl(e.target.value)}
           onKeyDown={handleKeyDown}
-          placeholder="Paste a YouTube URL"
+          placeholder={t('playlistPlaceholder')}
           className="flex-1"
         />
         <Button 
           onClick={handleUrlAdd}
           className="bg-neon-purple hover:bg-neon-purple/80"
         >
-          Add
+          {t('add')}
         </Button>
       </div>
       
       <div className="space-y-2 max-h-64 overflow-y-auto p-2">
         {urls.length === 0 ? (
           <p className="text-muted-foreground text-center py-4">
-            Your playlist is empty. Add some YouTube videos!
+            {t('playlistEmpty')}
           </p>
         ) : (
           urls.map((url, index) => {
@@ -106,7 +108,7 @@ const PlaylistManager: React.FC<PlaylistManagerProps> = ({ urls, onUrlsChange })
                   {videoId ? (
                     <span className="text-sm">{videoId}</span>
                   ) : (
-                    <span className="text-red-400 text-sm">Invalid URL</span>
+                    <span className="text-red-400 text-sm">{t('invalidUrl')}</span>
                   )}
                 </div>
                 <Button

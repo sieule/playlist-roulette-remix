@@ -1,15 +1,18 @@
 
 import React from 'react';
+import { useLanguage } from '@/context/LanguageContext';
 
 interface YoutubePlayerProps {
   videoId: string | null;
 }
 
 const YoutubePlayer: React.FC<YoutubePlayerProps> = ({ videoId }) => {
+  const { t } = useLanguage();
+
   if (!videoId) {
     return (
       <div className="youtube-container bg-gray-900 rounded-lg flex items-center justify-center">
-        <p className="text-gray-400">No video selected</p>
+        <p className="text-gray-400">{t('noVideoSelected')}</p>
       </div>
     );
   }

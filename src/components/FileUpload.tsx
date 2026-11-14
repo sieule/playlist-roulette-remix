@@ -2,12 +2,14 @@
 import React, { useState, useRef } from 'react';
 import { Button } from '@/components/ui/button';
 import { parseUrlsFromText } from '@/utils/youtubeUtils';
+import { useLanguage } from '@/context/LanguageContext';
 
 interface FileUploadProps {
   onUrlsUploaded: (urls: string[]) => void;
 }
 
 const FileUpload: React.FC<FileUploadProps> = ({ onUrlsUploaded }) => {
+  const { t } = useLanguage();
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -22,15 +24,15 @@ const FileUpload: React.FC<FileUploadProps> = ({ onUrlsUploaded }) => {
     try {
       const text = await file.text();
       const urls = parseUrlsFromText(text);
-      
+
       if (urls.length === 0) {
-        setError("No valid YouTube URLs found in file");
+        setError(t('uploadNoUrls'));
         return;
       }
-      
+
       onUrlsUploaded(urls);
     } catch (err) {
-      setError("Error reading file");
+      setError(t('uploadReadError'));
       console.error(err);
     } finally {
       setIsLoading(false);
@@ -51,15 +53,15 @@ const FileUpload: React.FC<FileUploadProps> = ({ onUrlsUploaded }) => {
         onChange={handleFileChange}
         className="sr-only"
       />
-      <Button 
+      <Button
         variant="outline"
         onClick={() => fileInputRef.current?.click()}
         disabled={isLoading}
         className="border-neon-purple hover:bg-neon-purple/20 transition-all"
       >
-        {isLoading ? "Loading..." : "Upload URL List (.txt)"}
+        {isLoading ? "Loading..." : t('uploadButton')}
       </Button>
-      
+
       {error && (
         <p className="text-red-500 mt-2 text-sm">{error}</p>
       )}
@@ -68,3 +70,4 @@ const FileUpload: React.FC<FileUploadProps> = ({ onUrlsUploaded }) => {
 };
 
 export default FileUpload;
+
